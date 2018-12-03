@@ -45,7 +45,12 @@ python eval.py --model_file <wave.ckpt-done模型的路径> --image_file img/tes
 
 结果保存到 generated/res.jpg
 
-例：视频风格化，运行:
+例：视频风格化:
+需要安装opencv:
+
+```
+pip install opencv-python
+```
 
 ```
 python video.py --model_file <wave.ckpt-done模型的路径> --video_file video/test.mp4 --out_video_file generated/test.mp4

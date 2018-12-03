@@ -7,6 +7,7 @@ import model
 import time
 import os
 import cv2
+import numpy as np
 
 tf.app.flags.DEFINE_string('loss_model', 'vgg_16', 'The name of the architecture to evaluate. '
                            'You can view all the support models in nets/nets_factory.py')
@@ -17,7 +18,6 @@ tf.app.flags.DEFINE_string("out_video_file", "test.mp4", "")
 
 FLAGS = tf.app.flags.FLAGS
 
-with tf.Session() as sess:
 
 def main(_):
     video_file=cv2.VideoCapture(FLAGS.video_file)
@@ -29,6 +29,18 @@ def main(_):
     height = image.shape[0]
     width = image.shape[1]
     tf.logging.info('Image size: %dx%d' % (width, height))
+
+    #转为视频
+    fps = 24   #视频帧率
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    videoWriter = cv2.VideoWriter(FLAGS.out_video_file, fourcc, fps, (width,height))
+
+    # while (nub<0):
+    #     img12 =cv2.imread(str(nub)+'.jpg')
+    #     videoWriter.write(img12)
+    # videoWriter.release()
+
+
     while ret:
         nub=nub+1
         
@@ -69,7 +81,7 @@ def main(_):
                 saver.restore(sess, FLAGS.model_file)
 
                 # Make sure 'generated' directory exists.
-                generated_file = 'generated/'+str(nub)+'.jpg'
+                generated_file = 'generated/0.jpg'
                 if os.path.exists('generated') is False:
                     os.makedirs('generated')
 
@@ -77,19 +89,14 @@ def main(_):
                 with open(generated_file, 'wb') as img:
                     start_time = time.time()
                     img.write(sess.run(tf.image.encode_jpeg(generated)))
+                    videoWriter.write(cv2.imread('generated/0.jpg'))
                     end_time = time.time()
                     tf.logging.info('Elapsed time: %fs' % (end_time - start_time))
+                    
 
                     # tf.logging.info('Done. Please check %s.' % generated_file)
         ret,image=video_file.read()
     video_file.release()
-
-    fps = 24   #视频帧率
-    fourcc = cv2.cv.CV_FOURCC('M','J','P','G')  
-    videoWriter = cv2.VideoWriter(FLAGS.out_video_file, fourcc, fps, (width,height))   #视频大小
-    while (nub<0):
-        img12 =cv2.imread(str(nub)+'.jpg')
-        videoWriter.write(img12)
     videoWriter.release()
 
 

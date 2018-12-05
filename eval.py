@@ -45,41 +45,8 @@ def fen(res,ii):
         head = head + ioio
     return ret
 
-
-def main(_):
-
-    # Get image's height and width.
-    height = 0
-    width = 0
-    # with open(FLAGS.image_file, 'rb') as img:
-    #     with tf.Session().as_default() as sess:
-    #         if FLAGS.image_file.lower().endswith('png'):
-    #             image = sess.run(tf.image.decode_png(img.read()))
-    #         else:
-    #             image = sess.run(tf.image.decode_jpeg(img.read()))
-    #         height = image.shape[0]
-    #         width = image.shape[1]
-
-    image = cv2.imread(FLAGS.image_file)
-    height = len(image)
-    width = len(image[0])
-    tf.logging.info('Image size: %dx%d' % (width, height))
-    image_ten=tf.Variable(image,name="n")
-    with tf.Session().as_default() as sess:
-        sess.run(tf.global_variables_initializer())
-        image=sess.run(image_ten)
-    f = []
-    ii = 0
-    if int(FLAGS.fen) > 1:
-        f = fen(image,int(FLAGS.fen))
-        ii = len(f)
-    else:
-        f.append(image)
-        ii = 1
-    
-    for i in range(ii):
-        v=tf.Variable(f[i],name="image")
-        with tf.Graph().as_default():
+def run(f,i,ii):
+    with tf.Graph().as_default():
             with tf.Session().as_default() as sess:
                 # Read image data.
                 # image_preprocessing_fn, _ = preprocessing_factory.get_preprocessing(
@@ -125,10 +92,44 @@ def main(_):
                         imageout = np.vstack((imageout,readimage[ deviation :len(readimage)-deviation]))
                     tf.logging.info('Elapsed time: %fs' % (end_time - start_time))
                     cv2.imwrite('generated/res.jpg',imageout)
-                    del imageout
-                    del readimage
-                del saver
-    tf.logging.info('Done. Please check %s.' % generated_file)
+                    
+
+def main(_):
+
+
+    # with open(FLAGS.image_file, 'rb') as img:
+    #     with tf.Session().as_default() as sess:
+    #         if FLAGS.image_file.lower().endswith('png'):
+    #             image = sess.run(tf.image.decode_png(img.read()))
+    #         else:
+    #             image = sess.run(tf.image.decode_jpeg(img.read()))
+    #         height = image.shape[0]
+    #         width = image.shape[1]
+
+    image = cv2.imread(FLAGS.image_file)
+
+    # Get image's height and width.
+    height = len(image)
+    width = len(image[0])
+    
+    tf.logging.info('Image size: %dx%d' % (width, height))
+    image_ten=tf.Variable(image,name="n")
+    with tf.Session().as_default() as sess:
+        sess.run(tf.global_variables_initializer())
+        image=sess.run(image_ten)
+    f = []
+    ii = 0
+    if int(FLAGS.fen) > 1:
+        f = fen(image,int(FLAGS.fen))
+        ii = len(f)
+    else:
+        f.append(image)
+        ii = 1
+    
+    for i in range(ii):
+        v=tf.Variable(f[i],name="image")
+        run(f,i,ii)
+    tf.logging.info('Done. ')
     
 
 
